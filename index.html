@@ -3,533 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stoo's Cards</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0a0a0a;
-            color: #e0e0e0;
-            overflow-x: hidden;
-        }
-
-        /* ==================== NAVIGATION ==================== */
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(10, 10, 10, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 140, 0, 0.1);
-            padding: 1rem 2rem;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-left {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .nav-logo {
-            font-weight: 700;
-            font-size: 0.9rem;
-            letter-spacing: 2px;
-            color: #fff;
-        }
-
-        nav a {
-            color: #999;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        nav a:hover {
-            color: #ff8c00;
-        }
-
-        .nav-right {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-
-        /* ==================== HERO SECTION ==================== */
-        .hero {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            margin-top: 60px;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(255, 140, 0, 0.05) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            max-width: 800px;
-        }
-
-        .hero-logo {
-            font-size: 6rem;
-            font-weight: 800;
-            margin-bottom: 2rem;
-            background: linear-gradient(135deg, #fff 0%, #ff8c00 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -2px;
-        }
-
-        .hero-subtitle {
-            font-size: 1.2rem;
-            color: #999;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 3rem;
-        }
-
-        .hero-description {
-            font-size: 1.1rem;
-            color: #aaa;
-            line-height: 1.8;
-            margin-bottom: 2rem;
-        }
-
-        /* ==================== TOP CARD SECTION ==================== */
-        .section-header {
-            font-size: 0.85rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: #ff8c00;
-            margin-bottom: 3rem;
-        }
-
-        .top-card-section {
-            padding: 6rem 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .top-card-container {
-            display: grid;
-            grid-template-columns: 1fr 1.5fr;
-            gap: 4rem;
-            align-items: center;
-            margin-bottom: 6rem;
-        }
-
-        .top-card-image {
-            position: relative;
-            display: flex;
-            justify-content: center;
-        }
-
-        .top-card-image img {
-            width: 100%;
-            max-width: 350px;
-            border-radius: 12px;
-            box-shadow: 0 20px 60px rgba(255, 140, 0, 0.15);
-            border: 2px solid rgba(255, 140, 0, 0.2);
-            transition: transform 0.3s;
-        }
-
-        .top-card-image img:hover {
-            transform: scale(1.02);
-        }
-
-        .top-card-info h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
-            font-weight: 700;
-        }
-
-        .top-card-info .rarity {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            border: 1px solid #ff8c00;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            margin-bottom: 2rem;
-            color: #ff8c00;
-        }
-
-        .top-card-info .description {
-            font-size: 1rem;
-            color: #999;
-            line-height: 1.8;
-            margin-bottom: 2rem;
-        }
-
-        .top-card-stats {
-            display: flex;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .stat-icon {
-            color: #ff8c00;
-            font-size: 1.2rem;
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            border: 1px solid #ff8c00;
-            background: transparent;
-            color: #ff8c00;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .btn:hover {
-            background: #ff8c00;
-            color: #0a0a0a;
-        }
-
-        .btn-primary {
-            background: #ff8c00;
-            color: #0a0a0a;
-        }
-
-        .btn-primary:hover {
-            background: transparent;
-            color: #ff8c00;
-        }
-
-        /* ==================== GALLERY SECTION ==================== */
-        .gallery-section {
-            padding: 6rem 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .gallery-header {
-            margin-bottom: 4rem;
-        }
-
-        .gallery-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 3rem;
-        }
-
-        .search-bar {
-            padding: 0.75rem 1.5rem;
-            background: rgba(255, 140, 0, 0.05);
-            border: 1px solid rgba(255, 140, 0, 0.2);
-            border-radius: 8px;
-            color: #e0e0e0;
-            width: 300px;
-            font-size: 0.9rem;
-        }
-
-        .search-bar::placeholder {
-            color: #666;
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .filter-btn {
-            padding: 0.75rem 1.5rem;
-            background: rgba(255, 140, 0, 0.1);
-            border: 1px solid rgba(255, 140, 0, 0.3);
-            color: #ff8c00;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .filter-btn:hover {
-            background: #ff8c00;
-            color: #0a0a0a;
-        }
-
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 2rem;
-        }
-
-        .card-item {
-            position: relative;
-            border-radius: 12px;
-            overflow: hidden;
-            background: rgba(20, 20, 20, 0.8);
-            border: 1px solid rgba(255, 140, 0, 0.1);
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .card-item:hover {
-            border-color: #ff8c00;
-            box-shadow: 0 15px 40px rgba(255, 140, 0, 0.2);
-            transform: translateY(-5px);
-        }
-
-        .card-image-wrapper {
-            position: relative;
-            overflow: hidden;
-            height: 380px;
-            background: #1a1a1a;
-        }
-
-        .card-image-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
-
-        .card-item:hover .card-image-wrapper img {
-            transform: scale(1.05);
-        }
-
-        .card-info {
-            padding: 1.5rem;
-        }
-
-        .card-name {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .card-type {
-            font-size: 0.85rem;
-            color: #999;
-            margin-bottom: 1rem;
-        }
-
-        .card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .card-likes {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #ff8c00;
-            font-size: 0.9rem;
-        }
-
-        .card-vote {
-            cursor: pointer;
-            color: #666;
-            transition: color 0.3s;
-            font-size: 1.2rem;
-        }
-
-        .card-vote:hover {
-            color: #ff8c00;
-        }
-
-        /* ==================== FOOTER ==================== */
-        footer {
-            padding: 3rem 2rem;
-            text-align: center;
-            color: #666;
-            font-size: 0.9rem;
-            border-top: 1px solid rgba(255, 140, 0, 0.1);
-        }
-
-        /* ==================== RESPONSIVE ==================== */
-        @media (max-width: 1024px) {
-            .cards-grid {
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-                gap: 1.5rem;
-            }
-
-            .top-card-container {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-
-            .hero-logo {
-                font-size: 3rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .cards-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .hero-logo {
-                font-size: 2.5rem;
-            }
-
-            .search-bar {
-                width: 100%;
-            }
-
-            .gallery-controls {
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-        }
-    </style>
+    <title>Stoo's Cards - Marketplace Pokémon TCG</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <!-- NAVIGATION -->
-    <nav>
-        <div class="nav-left">
-            <span class="nav-logo">STOO'S CARDS</span>
-            <a href="#"><i class="fas fa-arrow-left"></i> Retour</a>
-        </div>
-        <div class="nav-right">
-            <a href="#"><i class="fas fa-users"></i> Liste des Dresseurs</a>
-            <a href="#"><i class="fas fa-book"></i> Stoo's Dex</a>
-            <a href="#"><i class="fas fa-id-card"></i> Carte de Dresseur</a>
-            <a href="#"><i class="fas fa-user"></i> Stooria Off</a>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>Stoo's Cards</h1>
+            </div>
+            <div class="nav-center">
+                <input type="text" class="search-input" id="searchInput" placeholder="Rechercher une carte...">
+                <select id="typeFilter" class="filter-select">
+                    <option value="">Tous types</option>
+                    <option value="feu">Feu</option>
+                    <option value="eau">Eau</option>
+                    <option value="plante">Plante</option>
+                    <option value="electrique">Électrique</option>
+                    <option value="psychique">Psychique</option>
+                    <option value="combat">Combat</option>
+                    <option value="poison">Poison</option>
+                    <option value="sol">Sol</option>
+                    <option value="vol">Vol</option>
+                    <option value="insecte">Insecte</option>
+                    <option value="roche">Roche</option>
+                    <option value="fantome">Fantôme</option>
+                    <option value="metal">Métal</option>
+                    <option value="fee">Fée</option>
+                    <option value="dragon">Dragon</option>
+                    <option value="tenebres">Ténèbres</option>
+                    <option value="incolore">Incolore</option>
+                </select>
+                <select id="rarityFilter" class="filter-select">
+                    <option value="">Toutes raretés</option>
+                    <option value="commune">Commune</option>
+                    <option value="peu-commune">Peu commune</option>
+                    <option value="rare">Rare</option>
+                    <option value="holoRare">Holo rare</option>
+                    <option value="ex">EX</option>
+                    <option value="gx">GX</option>
+                    <option value="v">V</option>
+                    <option value="vmax">VMAX</option>
+                    <option value="vstar">VSTAR</option>
+                </select>
+            </div>
+            <div class="nav-right">
+                <button id="commanderBtn" class="btn-nav">📦 Commandes</button>
+                <button id="boosterBtn" class="btn-nav">🎁 Boosters</button>
+                <button id="addCardBtn" class="btn-add">+ Ajouter</button>
+            </div>
         </div>
     </nav>
 
     <!-- HERO SECTION -->
     <section class="hero">
         <div class="hero-content">
-            <div class="hero-logo">Stoo's Cards</div>
-            <div class="hero-subtitle">Collection Pokémon</div>
-            <p class="hero-description">Découvrez une communauté passionnée de collectionneurs de cartes Pokémon. Partagez vos cartes, votes et collections.</p>
+            <h2>Bienvenue dans l'univers des cartes rares</h2>
+            <p>Découvrez, collectionnez et échangez les meilleures cartes Pokémon TCG</p>
         </div>
     </section>
 
     <!-- TOP CARD OF THE WEEK -->
     <section class="top-card-section">
-        <div class="section-header">👑 Top Card of the Week</div>
-        
-        <div class="top-card-container">
-            <div class="top-card-image">
-                <img src="https://via.placeholder.com/350x480?text=Ronflex" alt="Ronflex">
-            </div>
-            <div class="top-card-info">
-                <span class="rarity">Ultra Rare</span>
-                <h2>Ronflex</h2>
-                <p class="description">La carte la plus votée cette semaine ! Découvrez pourquoi cette carte fait l'unanimité parmi les collectionneurs.</p>
-                <div class="top-card-stats">
-                    <div class="stat">
-                        <span class="stat-icon">❤️</span>
-                        <span>2 votes · Meilleure carte de la semaine</span>
-                    </div>
-                </div>
-                <div class="card-actions">
-                    <button class="btn">Voir la carte →</button>
-                </div>
+        <div class="container">
+            <h3>✨ Carte de la semaine</h3>
+            <div id="topCard" class="top-card-container">
+                <div class="skeleton-card"></div>
             </div>
         </div>
     </section>
 
-    <!-- GALLERY SECTION -->
-    <section class="gallery-section">
-        <div class="gallery-header">
-            <div class="section-header">📚 Galerie</div>
-        </div>
-
-        <div class="gallery-controls">
-            <input type="text" class="search-bar" placeholder="Rechercher une carte...">
-            <div class="filter-buttons">
-                <button class="filter-btn">Tous types</button>
-                <button class="filter-btn">Toutes raretés</button>
+    <!-- GALERIE DE CARTES -->
+    <section class="gallery">
+        <div class="container">
+            <div id="cardsGrid" class="cards-grid">
+                <!-- Les cartes s'affichent ici dynamiquement -->
             </div>
         </div>
-
-        <div class="cards-grid">
-            <!-- Les cartes seront générées par JavaScript -->
-        </div>
     </section>
+
+    <!-- ADMIN PANEL (caché par défaut) -->
+    <div id="adminModal" class="modal hidden">
+        <div class="modal-content">
+            <button class="close-btn">&times;</button>
+            <h2>Ajouter une nouvelle carte</h2>
+            
+            <form id="cardForm">
+                <div class="form-group">
+                    <label>Nom de la carte</label>
+                    <input type="text" id="cardName" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Dresseur (Type de créature)</label>
+                    <input type="text" id="cardDresseur" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="cardType" required>
+                        <option value="">Choisir un type</option>
+                        <option value="feu">Feu</option>
+                        <option value="eau">Eau</option>
+                        <option value="plante">Plante</option>
+                        <option value="electrique">Électrique</option>
+                        <option value="psychique">Psychique</option>
+                        <option value="combat">Combat</option>
+                        <option value="poison">Poison</option>
+                        <option value="sol">Sol</option>
+                        <option value="vol">Vol</option>
+                        <option value="insecte">Insecte</option>
+                        <option value="roche">Roche</option>
+                        <option value="fantome">Fantôme</option>
+                        <option value="metal">Métal</option>
+                        <option value="fee">Fée</option>
+                        <option value="dragon">Dragon</option>
+                        <option value="tenebres">Ténèbres</option>
+                        <option value="incolore">Incolore</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Rareté</label>
+                    <select id="cardRarity" required>
+                        <option value="">Choisir une rareté</option>
+                        <option value="commune">Commune</option>
+                        <option value="peu-commune">Peu commune</option>
+                        <option value="rare">Rare</option>
+                        <option value="holoRare">Holo rare</option>
+                        <option value="ex">EX</option>
+                        <option value="gx">GX</option>
+                        <option value="v">V</option>
+                        <option value="vmax">VMAX</option>
+                        <option value="vstar">VSTAR</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>PV (Points de Vie)</label>
+                    <input type="number" id="cardPV" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Prix (€)</label>
+                    <input type="number" id="cardPrice" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Image de la carte</label>
+                    <input type="file" id="cardImage" accept="image/*" required>
+                    <div id="imagePreview" class="image-preview"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="cardDescription"></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">Ajouter la carte</button>
+            </form>
+        </div>
+    </div>
 
     <!-- FOOTER -->
-    <footer>
-        <p>&copy; 2024 Stoo's Cards. Un projet amateur créé avec passion.</p>
+    <footer class="footer">
+        <p>&copy; 2025 Stoo's Cards. Tous droits réservés.</p>
     </footer>
 
-    <script>
-        // Données de test (tu les remplaceras par tes vraies données de Supabase)
-        const cardsData = [
-            { id: 1, name: 'Rayquaza', type: 'Dragon', image: 'https://via.placeholder.com/280x380?text=Rayquaza', likes: 12 },
-            { id: 2, name: 'Nidoqueen', type: 'Poison', image: 'https://via.placeholder.com/280x380?text=Nidoqueen', likes: 8 },
-            { id: 3, name: 'Mystherbe', type: 'Plante', image: 'https://via.placeholder.com/280x380?text=Mystherbe', likes: 5 },
-            { id: 4, name: 'Ronflex', type: 'Normal', image: 'https://via.placeholder.com/280x380?text=Ronflex', likes: 15 },
-            { id: 5, name: 'Tortank', type: 'Eau', image: 'https://via.placeholder.com/280x380?text=Tortank', likes: 10 },
-            { id: 6, name: 'Dracaufeu', type: 'Feu', image: 'https://via.placeholder.com/280x380?text=Dracaufeu', likes: 20 },
-            { id: 7, name: 'Florizarre', type: 'Plante', image: 'https://via.placeholder.com/280x380?text=Florizarre', likes: 7 },
-            { id: 8, name: 'Ectoplasma', type: 'Spectre', image: 'https://via.placeholder.com/280x380?text=Ectoplasma', likes: 9 },
-        ];
-
-        // Afficher les cartes
-        const cardsGrid = document.querySelector('.cards-grid');
-        cardsData.forEach(card => {
-            const cardEl = document.createElement('div');
-            cardEl.className = 'card-item';
-            cardEl.innerHTML = `
-                <div class="card-image-wrapper">
-                    <img src="${card.image}" alt="${card.name}">
-                </div>
-                <div class="card-info">
-                    <div class="card-name">${card.name}</div>
-                    <div class="card-type">${card.type}</div>
-                    <div class="card-footer">
-                        <div class="card-likes">
-                            <span>❤️</span>
-                            <span>${card.likes}</span>
-                        </div>
-                        <div class="card-vote">
-                            <i class="fas fa-circle"></i>
-                        </div>
-                    </div>
-                </div>
-            `;
-            cardsGrid.appendChild(cardEl);
-        });
-    </script>
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.4/dist/module.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
