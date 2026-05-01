@@ -3,175 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stoo's Cards - Marketplace Pokémon TCG</title>
+    <title>Pokémon TCG Vault - Mythic Collection</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- NAVIGATION -->
+    <!-- 🎯 NAVBAR -->
     <nav class="navbar">
-        <div class="container">
-            <div class="nav-brand">
-                <h1>Stoo's Cards</h1>
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">MYTHIC VAULT</span>
             </div>
-            <div class="nav-center">
-                <input type="text" class="search-input" id="searchInput" placeholder="Rechercher une carte...">
-                <select id="typeFilter" class="filter-select">
-                    <option value="">Tous types</option>
-                    <option value="feu">Feu</option>
-                    <option value="eau">Eau</option>
-                    <option value="plante">Plante</option>
-                    <option value="electrique">Électrique</option>
-                    <option value="psychique">Psychique</option>
-                    <option value="combat">Combat</option>
-                    <option value="poison">Poison</option>
-                    <option value="sol">Sol</option>
-                    <option value="vol">Vol</option>
-                    <option value="insecte">Insecte</option>
-                    <option value="roche">Roche</option>
-                    <option value="fantome">Fantôme</option>
-                    <option value="metal">Métal</option>
-                    <option value="fee">Fée</option>
-                    <option value="dragon">Dragon</option>
-                    <option value="tenebres">Ténèbres</option>
-                    <option value="incolore">Incolore</option>
-                </select>
-                <select id="rarityFilter" class="filter-select">
-                    <option value="">Toutes raretés</option>
-                    <option value="commune">Commune</option>
-                    <option value="peu-commune">Peu commune</option>
-                    <option value="rare">Rare</option>
-                    <option value="holoRare">Holo rare</option>
-                    <option value="ex">EX</option>
-                    <option value="gx">GX</option>
-                    <option value="v">V</option>
-                    <option value="vmax">VMAX</option>
-                    <option value="vstar">VSTAR</option>
-                </select>
-            </div>
-            <div class="nav-right">
-                <button id="commanderBtn" class="btn-nav">📦 Commandes</button>
-                <button id="boosterBtn" class="btn-nav">🎁 Boosters</button>
-                <button id="addCardBtn" class="btn-add">+ Ajouter</button>
+            
+            <div class="nav-links">
+                <a href="#" class="nav-link active" data-filter="all">Gallery</a>
+                <a href="#" class="nav-link" data-filter="favorites">❤️ Favoris</a>
+                <a href="#" class="nav-link" id="cart-link">🛒 Panier</a>
+                <a href="#" class="nav-link" id="admin-toggle">⚙️ Admin</a>
             </div>
         </div>
     </nav>
 
-    <!-- HERO SECTION -->
+    <!-- 🎨 HERO SECTION -->
     <section class="hero">
         <div class="hero-content">
-            <h2>Bienvenue dans l'univers des cartes rares</h2>
-            <p>Découvrez, collectionnez et échangez les meilleures cartes Pokémon TCG</p>
+            <h1 class="hero-title">POKÉMON TCG</h1>
+            <p class="hero-subtitle">Mythic Vault - Rare & Legendary Collection</p>
         </div>
     </section>
 
-    <!-- TOP CARD OF THE WEEK -->
-    <section class="top-card-section">
-        <div class="container">
-            <h3>✨ Carte de la semaine</h3>
-            <div id="topCard" class="top-card-container">
-                <div class="skeleton-card"></div>
-            </div>
+    <!-- 🔍 SEARCH & FILTERS -->
+    <section class="filters-section">
+        <div class="search-box">
+            <input 
+                type="text" 
+                id="searchInput" 
+                class="search-input" 
+                placeholder="Rechercher une carte..."
+            >
+            <span class="search-icon">🔍</span>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">Toutes</button>
+            <button class="filter-btn" data-filter="pokemon">Pokémon</button>
+            <button class="filter-btn" data-filter="trainer">Trainer</button>
+            <button class="filter-btn" data-filter="energy">Energie</button>
+            <button class="filter-btn" data-filter="rare">Rare</button>
         </div>
     </section>
 
-    <!-- GALERIE DE CARTES -->
-    <section class="gallery">
-        <div class="container">
-            <div id="cardsGrid" class="cards-grid">
-                <!-- Les cartes s'affichent ici dynamiquement -->
-            </div>
+    <!-- 📦 GALLERY MAIN -->
+    <main class="gallery-container">
+        <div class="cards-grid" id="cardsGrid">
+            <!-- Cartes générées par JS -->
         </div>
-    </section>
+    </main>
 
-    <!-- ADMIN PANEL (caché par défaut) -->
-    <div id="adminModal" class="modal hidden">
+    <!-- 💫 MODAL DÉTAIL CARTE -->
+    <div class="modal" id="cardModal">
         <div class="modal-content">
-            <button class="close-btn">&times;</button>
-            <h2>Ajouter une nouvelle carte</h2>
-            
-            <form id="cardForm">
-                <div class="form-group">
-                    <label>Nom de la carte</label>
-                    <input type="text" id="cardName" required>
+            <button class="modal-close">&times;</button>
+            <div class="modal-body">
+                <div class="modal-image">
+                    <img id="modalImage" src="" alt="">
                 </div>
-
-                <div class="form-group">
-                    <label>Dresseur (Type de créature)</label>
-                    <input type="text" id="cardDresseur" required>
+                <div class="modal-info">
+                    <h2 id="modalName"></h2>
+                    <p id="modalType" class="modal-type"></p>
+                    <p id="modalDesc" class="modal-description"></p>
+                    <div class="modal-meta">
+                        <span id="modalRarity" class="rarity-badge"></span>
+                        <span id="modalPrice" class="price"></span>
+                    </div>
+                    <button class="btn-primary" id="addToCartBtn">Ajouter au panier</button>
+                    <button class="btn-secondary" id="toggleFavBtn">❤️ Ajouter aux favoris</button>
                 </div>
-
-                <div class="form-group">
-                    <label>Type</label>
-                    <select id="cardType" required>
-                        <option value="">Choisir un type</option>
-                        <option value="feu">Feu</option>
-                        <option value="eau">Eau</option>
-                        <option value="plante">Plante</option>
-                        <option value="electrique">Électrique</option>
-                        <option value="psychique">Psychique</option>
-                        <option value="combat">Combat</option>
-                        <option value="poison">Poison</option>
-                        <option value="sol">Sol</option>
-                        <option value="vol">Vol</option>
-                        <option value="insecte">Insecte</option>
-                        <option value="roche">Roche</option>
-                        <option value="fantome">Fantôme</option>
-                        <option value="metal">Métal</option>
-                        <option value="fee">Fée</option>
-                        <option value="dragon">Dragon</option>
-                        <option value="tenebres">Ténèbres</option>
-                        <option value="incolore">Incolore</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Rareté</label>
-                    <select id="cardRarity" required>
-                        <option value="">Choisir une rareté</option>
-                        <option value="commune">Commune</option>
-                        <option value="peu-commune">Peu commune</option>
-                        <option value="rare">Rare</option>
-                        <option value="holoRare">Holo rare</option>
-                        <option value="ex">EX</option>
-                        <option value="gx">GX</option>
-                        <option value="v">V</option>
-                        <option value="vmax">VMAX</option>
-                        <option value="vstar">VSTAR</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>PV (Points de Vie)</label>
-                    <input type="number" id="cardPV" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Prix (€)</label>
-                    <input type="number" id="cardPrice" step="0.01" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Image de la carte</label>
-                    <input type="file" id="cardImage" accept="image/*" required>
-                    <div id="imagePreview" class="image-preview"></div>
-                </div>
-
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="cardDescription"></textarea>
-                </div>
-
-                <button type="submit" class="btn-submit">Ajouter la carte</button>
-            </form>
+            </div>
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="footer">
-        <p>&copy; 2025 Stoo's Cards. Tous droits réservés.</p>
-    </footer>
+    <!-- 🛒 PANIER SIDEBAR -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3>Panier</h3>
+            <button class="close-cart">&times;</button>
+        </div>
+        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <strong>Total:</strong>
+                <span id="cartTotal">0€</span>
+            </div>
+            <button class="btn-primary" id="checkoutBtn">Valider</button>
+        </div>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.4/dist/module.js"></script>
+    <!-- ⚙️ ADMIN PANEL -->
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-header">
+            <h2>Admin Panel</h2>
+            <button class="admin-close">&times;</button>
+        </div>
+
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="add">➕ Ajouter Carte</button>
+            <button class="admin-tab" data-tab="manage">📋 Gérer</button>
+        </div>
+
+        <!-- Tab: Ajouter -->
+        <div class="admin-content active" id="addCardTab">
+            <form id="addCardForm" class="admin-form">
+                <input type="text" id="cardName" placeholder="Nom de la carte" required>
+                <select id="cardType" required>
+                    <option value="">Type...</option>
+                    <option value="pokemon">Pokémon</option>
+                    <option value="trainer">Trainer</option>
+                    <option value="energy">Energie</option>
+                </select>
+                <select id="cardRarity" required>
+                    <option value="">Rareté...</option>
+                    <option value="common">Commune</option>
+                    <option value="uncommon">Peu courante</option>
+                    <option value="rare">Rare</option>
+                    <option value="legendary">Légendaire</option>
+                </select>
+                <input type="number" id="cardPrice" placeholder="Prix (€)" step="0.01" required>
+                <textarea id="cardDesc" placeholder="Description..." rows="3"></textarea>
+                <input type="file" id="cardImage" accept="image/*" required>
+                <button type="submit" class="btn-primary">Ajouter la carte</button>
+            </form>
+        </div>
+
+        <!-- Tab: Gérer -->
+        <div class="admin-content" id="manageCardTab">
+            <div class="admin-list" id="adminList"></div>
+        </div>
+    </div>
+
+    <!-- 🎯 Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="app.js"></script>
 </body>
 </html>
