@@ -1,255 +1,571 @@
-// app.js
+// ============================================
+// 🚀 POKÉMON TCG VAULT - APP.JS
+// ============================================
 
-// Configuration Supabase
-const SUPABASE_URL = 'https://bykkzjlfnhosjtvxfutw.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5a2t6amxmbmhvc2p0dnhmdXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1ODUyNTUsImV4cCI6MjA5MzE2MTI1NX0.ITKVkjp3t0lbhvr2GmOZsJIem6ic_9VqMmreFt5MaTs';
-
+// 🔑 CONFIG SUPABASE
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = 'YOUR_SUPABASE_KEY';
 const { createClient } = window.supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// 💾 STATE
 let allCards = [];
 let filteredCards = [];
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
+let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+let currentFilter = 'all';
+let currentCard = null;
 
-// DOM Elements
+// ============================
+// 📱 DOM ELEMENTS
+// ============================
+
 const cardsGrid = document.getElementById('cardsGrid');
-const addCardBtn = document.getElementById('addCardBtn');
-const adminModal = document.getElementById('adminModal');
-const closeBtn = document.querySelector('.close-btn');
-const cardForm = document.getElementById('cardForm');
 const searchInput = document.getElementById('searchInput');
-const typeFilter = document.getElementById('typeFilter');
-const rarityFilter = document.getElementById('rarityFilter');
-const cardImageInput = document.getElementById('cardImage');
-const imagePreview = document.getElementById('imagePreview');
+const filterBtns = document.querySelectorAll('.filter-btn');
+const navLinks = document.querySelectorAll('.nav-link');
+const cardModal = document.getElementById('cardModal');
+const modalClose = document.querySelector('.modal-close');
+const cartSidebar = document.getElementById('cartSidebar');
+const cartLink = document.getElementById('cart-link');
+const closeCart = document.querySelector('.close-cart');
+const cartItems = document.getElementById('cartItems');
+const addToCartBtn = document.getElementById('addToCartBtn');
+const toggleFavBtn = document.getElementById('toggleFavBtn');
+const adminPanel = document.getElementById('adminPanel');
+const adminToggle = document.getElementById('admin-toggle');
+const adminClose = document.querySelector('.admin-close');
+const overlay = document.getElementById('overlay');
+const addCardForm = document.getElementById('addCardForm');
+const adminTabs = document.querySelectorAll('.admin-tab');
+const adminContents = document.querySelectorAll('.admin-content');
 
-// Événements
-addCardBtn.addEventListener('click', () => adminModal.classList.remove('hidden'));
-closeBtn.addEventListener('click', () => adminModal.classList.add('hidden'));
-cardForm.addEventListener('submit', handleAddCard);
-cardImageInput.addEventListener('change', handleImagePreview);
-searchInput.addEventListener('input', filterCards);
-typeFilter.addEventListener('change', filterCards);
-rarityFilter.addEventListener('change', filterCards);
+// ============================
+// 🎯 INITIALIZATION
+// ============================
 
-// Prévisualisation image
-function handleImagePreview(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            imagePreview.innerHTML = `<img src="${event.target.result}" alt="preview">`;
-        };
-        reader.readAsDataURL(file);
+async function init() {
+    try {
+        console.log('🚀 Initialization...');
+        
+        // Charger les cartes
+        await loadCards();
+        
+        // Afficher les cartes
+        renderCards(allCards);
+        
+        // Bind events
+        bindEvents();
+        
+        // Charger le panier
+        updateCartUI();
+        
+        console.log('✅ Ready!');
+    } catch (error) {
+        console.error('❌ Erreur init:', error);
     }
 }
 
-// Charger les cartes
+// ============================
+// 📥 LOAD CARDS FROM SUPABASE
+// ============================
+
 async function loadCards() {
     try {
         const { data, error } = await supabase
             .from('cards')
-            .select('*')
-            .order('created_at', { ascending: false });
+            .select('*');
 
         if (error) throw error;
         
         allCards = data || [];
-        filteredCards = [...allCards];
-        displayCards(filteredCards);
-        displayTopCard();
+        filteredCards = allCards;
+        
+        console.log(`✅ ${allCards.length} cartes chargées`);
     } catch (error) {
-        console.error('Erreur:', error);
-        cardsGrid.innerHTML = '<p>Erreur lors du chargement des cartes</p>';
+        console.error('❌ Erreur chargement:', error);
+        // Mode offline avec données exemple
+        loadMockCards();
     }
 }
 
-// Afficher les cartes
-function displayCards(cards) {
-    cardsGrid.innerHTML = cards.length > 0 
-        ? cards.map(card => `
-            <div class="card-item">
-                <div class="card-image">
-                    <img src="${card.image_url}" alt="${card.name}" onerror="this.src='https://via.placeholder.com/220x280?text=No+Image'">
-                </div>
-                <div class="card-content">
-                    <div class="card-header">
-                        <div class="card-name">${card.name}</div>
-                        <div class="card-dresseur">${card.dresseur}</div>
-                    </div>
-                    <span class="card-type">${card.type}</span>
-                    <div class="card-meta">
-                        <span class="card-pv">${card.pv} PV</span>
-                        <span class="card-rarity">${card.rarity}</span>
-                    </div>
-                    <div class="card-price">${card.price}€</div>
-                    <div class="card-actions">
-                        <button class="btn-action" onclick="editCard(${card.id})">✏️ Éditer</button>
-                        <button class="btn-action" onclick="deleteCard(${card.id})">🗑️ Supprimer</button>
-                        <button class="btn-heart btn-action" onclick="toggleLike(${card.id})">❤️</button>
-                    </div>
-                </div>
-            </div>
-        `).join('')
-        : '<p style="grid-column: 1/-1; text-align: center;">Aucune carte trouvée</p>';
+// Mock data (si pas de Supabase)
+function loadMockCards() {
+    allCards = [
+        {
+            id: 1,
+            name: 'Pikachu EX',
+            type: 'pokemon',
+            rarity: 'rare',
+            price: 45.99,
+            description: 'Électrique légendaire avec attaque puissante',
+            image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=500&h=600&fit=crop'
+        },
+        {
+            id: 2,
+            name: 'Charizard GX',
+            type: 'pokemon',
+            rarity: 'legendary',
+            price: 120.00,
+            description: 'Dragon de feu rare et puissant',
+            image: 'https://images.unsplash.com/photo-1613387573392-4921cffb38f8?w=500&h=600&fit=crop'
+        },
+        {
+            id: 3,
+            name: 'Potion',
+            type: 'trainer',
+            rarity: 'common',
+            price: 8.99,
+            description: 'Récupère 20 PV',
+            image: 'https://images.unsplash.com/photo-1576089160550-2173dba999ef?w=500&h=600&fit=crop'
+        },
+        {
+            id: 4,
+            name: 'Electric Energy',
+            type: 'energy',
+            rarity: 'common',
+            price: 5.99,
+            description: 'Énergie électrique basique',
+            image: 'https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=500&h=600&fit=crop'
+        },
+        {
+            id: 5,
+            name: 'Blastoise V',
+            type: 'pokemon',
+            rarity: 'rare',
+            price: 35.99,
+            description: 'Pokémon Eau puissant',
+            image: 'https://images.unsplash.com/photo-1599720575179-d3d6fcb5df86?w=500&h=600&fit=crop'
+        },
+        {
+            id: 6,
+            name: 'Mewtwo GX',
+            type: 'pokemon',
+            rarity: 'legendary',
+            price: 150.00,
+            description: 'Pokémon psychique surpuissant',
+            image: 'https://images.unsplash.com/photo-1569163139394-de4798aa62b3?w=500&h=600&fit=crop'
+        }
+    ];
+    filteredCards = allCards;
 }
 
-// Afficher la carte de la semaine
-function displayTopCard() {
-    const topCardContainer = document.getElementById('topCard');
-    if (allCards.length === 0) return;
+// ============================
+// 🎨 RENDER CARDS
+// ============================
 
-    const topCard = allCards[0]; // La plus récente
-    topCardContainer.innerHTML = `
-        <div class="top-card">
-            <div class="top-card-image">
-                <img src="${topCard.image_url}" alt="${topCard.name}" onerror="this.src='https://via.placeholder.com/280x380?text=No+Image'">
-            </div>
-            <div class="top-card-info">
-                <h2>${topCard.name}</h2>
-                <p>${topCard.description || 'Une carte exceptionnelle de notre collection'}</p>
-                <div class="card-stats">
-                    <div class="stat">
-                        <div class="stat-label">PV</div>
-                        <div class="stat-value">${topCard.pv}</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-label">Type</div>
-                        <div class="stat-value">${topCard.type.toUpperCase().substring(0, 3)}</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-label">Prix</div>
-                        <div class="stat-value">${topCard.price}€</div>
-                    </div>
-                </div>
-                <button class="btn-add" style="width: 100%;">🛒 Acheter maintenant</button>
-            </div>
-        </div>
-    `;
-}
-
-// Ajouter une carte
-async function handleAddCard(e) {
-    e.preventDefault();
-
-    const file = cardImageInput.files[0];
-    if (!file) {
-        alert('Veuillez sélectionner une image');
+function renderCards(cards) {
+    cardsGrid.innerHTML = '';
+    
+    if (cards.length === 0) {
+        cardsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #a0a0a0; padding: 3rem;">Aucune carte trouvée...</p>';
         return;
     }
 
+    cards.forEach(card => {
+        const cardEl = createCardElement(card);
+        cardsGrid.appendChild(cardEl);
+    });
+}
+
+function createCardElement(card) {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+        <div class="card-image">
+            <img src="${card.image}" alt="${card.name}" loading="lazy">
+        </div>
+        <div class="card-content">
+            <h3 class="card-title">${card.name}</h3>
+            <div class="card-meta">
+                <span class="card-type">${card.type}</span>
+                <span class="card-price">${card.price.toFixed(2)}€</span>
+            </div>
+        </div>
+    `;
+
+    div.addEventListener('click', () => openCardModal(card));
+    return div;
+}
+
+// ============================
+// 📋 MODAL DÉTAIL
+// ============================
+
+function openCardModal(card) {
+    currentCard = card;
+    
+    document.getElementById('modalImage').src = card.image;
+    document.getElementById('modalName').textContent = card.name;
+    document.getElementById('modalType').textContent = `Type: ${card.type}`;
+    document.getElementById('modalDesc').textContent = card.description;
+    document.getElementById('modalRarity').textContent = card.rarity.toUpperCase();
+    document.getElementById('modalPrice').textContent = `${card.price.toFixed(2)}€`;
+    
+    // Update fav btn
+    const isFav = favorites.some(f => f.id === card.id);
+    toggleFavBtn.textContent = isFav ? '❤️ Dans les favoris' : '🤍 Ajouter aux favoris';
+    
+    cardModal.classList.add('active');
+    overlay.classList.add('active');
+}
+
+function closeCardModal() {
+    cardModal.classList.remove('active');
+    overlay.classList.remove('active');
+    currentCard = null;
+}
+
+// ============================
+// 🛒 CART FUNCTIONS
+// ============================
+
+function addToCart() {
+    if (!currentCard) return;
+    
+    const existingItem = cart.find(item => item.id === currentCard.id);
+    
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({
+            ...currentCard,
+            quantity: 1
+        });
+    }
+    
+    saveCart();
+    updateCartUI();
+    
+    // Feedback
+    addToCartBtn.textContent = '✅ Ajouté!';
+    setTimeout(() => {
+        addToCartBtn.textContent = 'Ajouter au panier';
+    }, 1500);
+}
+
+function removeFromCart(cardId) {
+    cart = cart.filter(item => item.id !== cardId);
+    saveCart();
+    updateCartUI();
+}
+
+function updateQuantity(cardId, change) {
+    const item = cart.find(item => item.id === cardId);
+    if (item) {
+        item.quantity += change;
+        if (item.quantity <= 0) {
+            removeFromCart(cardId);
+        } else {
+            saveCart();
+            updateCartUI();
+        }
+    }
+}
+
+function updateCartUI() {
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    document.getElementById('cartTotal').textContent = total.toFixed(2) + '€';
+    
+    cartItems.innerHTML = '';
+    
+    if (cart.length === 0) {
+        cartItems.innerHTML = '<p style="text-align: center; color: #a0a0a0;">Panier vide</p>';
+        return;
+    }
+    
+    cart.forEach(item => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'cart-item';
+        itemEl.innerHTML = `
+            <div class="cart-item-image">
+                <img src="${item.image}" alt="${item.name}">
+            </div>
+            <div class="cart-item-info">
+                <div class="cart-item-name">${item.name}</div>
+                <div class="cart-item-price">${item.price.toFixed(2)}€</div>
+                <div class="cart-item-qty">
+                    <button class="qty-btn" data-id="${item.id}" data-action="minus">−</button>
+                    <span>${item.quantity}</span>
+                    <button class="qty-btn" data-id="${item.id}" data-action="plus">+</button>
+                    <button class="remove-item" data-id="${item.id}">Supprimer</button>
+                </div>
+            </div>
+        `;
+        cartItems.appendChild(itemEl);
+    });
+}
+
+function saveCart() {
+    localStorage.setItem('cart', JSON.stringify(cart));
+}
+
+// ============================
+// ❤️ FAVORITES
+// ============================
+
+function toggleFavorite() {
+    if (!currentCard) return;
+    
+    const index = favorites.findIndex(f => f.id === currentCard.id);
+    
+    if (index > -1) {
+        favorites.splice(index, 1);
+    } else {
+        favorites.push(currentCard);
+    }
+    
+    saveFavorites();
+    toggleFavBtn.textContent = index > -1 ? '🤍 Ajouter aux favoris' : '❤️ Dans les favoris';
+}
+
+function saveFavorites() {
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+}
+
+// ============================
+// 🔍 SEARCH & FILTER
+// ============================
+
+function filterCards() {
+    let result = allCards;
+    
+    // Filter par type
+    if (currentFilter !== 'all') {
+        result = result.filter(card => card.type === currentFilter || card.rarity === currentFilter);
+    }
+    
+    // Search
+    const searchTerm = searchInput.value.toLowerCase();
+    if (searchTerm) {
+        result = result.filter(card => 
+            card.name.toLowerCase().includes(searchTerm) ||
+            card.description.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    filteredCards = result;
+    renderCards(filteredCards);
+}
+
+// ============================
+// ⚙️ ADMIN FUNCTIONS
+// ============================
+
+async function addCard(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('cardName').value;
+    const type = document.getElementById('cardType').value;
+    const rarity = document.getElementById('cardRarity').value;
+    const price = parseFloat(document.getElementById('cardPrice').value);
+    const description = document.getElementById('cardDesc').value;
+    const imageFile = document.getElementById('cardImage').files[0];
+    
+    if (!imageFile) {
+        alert('Selectionne une image!');
+        return;
+    }
+    
     try {
-        // Upload image vers Supabase Storage
-        const fileName = `${Date.now()}_${file.name}`;
-        const { error: uploadError } = await supabase.storage
-            .from('cards-images')
-            .upload(fileName, file);
-
-        if (uploadError) throw uploadError;
-
-        // Obtenir l'URL publique
-        const { data } = supabase.storage
-            .from('cards-images')
+        // Upload image
+        const fileName = `card-${Date.now()}-${imageFile.name}`;
+        const { data: imageData, error: imageError } = await supabase.storage
+            .from('cards')
+            .upload(fileName, imageFile);
+        
+        if (imageError) throw imageError;
+        
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from('cards')
             .getPublicUrl(fileName);
-
-        const imageUrl = data.publicUrl;
-
-        // Insérer la carte dans la DB
-        const { error: insertError } = await supabase
+        
+        // Add card to DB
+        const { data, error } = await supabase
             .from('cards')
-            .insert([{
-                name: document.getElementById('cardName').value,
-                dresseur: document.getElementById('cardDresseur').value,
-                type: document.getElementById('cardType').value,
-                rarity: document.getElementById('cardRarity').value,
-                pv: parseInt(document.getElementById('cardPV').value),
-                price: parseFloat(document.getElementById('cardPrice').value),
-                image_url: imageUrl,
-                description: document.getElementById('cardDescription').value,
-                created_at: new Date().toISOString()
-            }]);
-
-        if (insertError) throw insertError;
-
-        alert('✅ Carte ajoutée avec succès !');
-        cardForm.reset();
-        imagePreview.innerHTML = '';
-        adminModal.classList.add('hidden');
-        loadCards();
-    } catch (error) {
-        console.error('Erreur:', error);
-        alert('❌ Erreur : ' + error.message);
-    }
-}
-
-// Éditer une carte
-async function editCard(id) {
-    const card = allCards.find(c => c.id === id);
-    if (!card) return;
-
-    const newPrice = prompt('Nouveau prix (€):', card.price);
-    if (newPrice === null) return;
-
-    try {
-        const { error } = await supabase
-            .from('cards')
-            .update({ price: parseFloat(newPrice) })
-            .eq('id', id);
-
+            .insert({
+                name,
+                type,
+                rarity,
+                price,
+                description,
+                image: publicUrl
+            });
+        
         if (error) throw error;
-
-        alert('✅ Carte mise à jour !');
-        loadCards();
+        
+        alert('✅ Carte ajoutée!');
+        addCardForm.reset();
+        
+        // Reload cards
+        await loadCards();
+        renderCards(filteredCards);
+        
     } catch (error) {
-        alert('❌ Erreur : ' + error.message);
+        console.error('❌ Erreur:', error);
+        alert('Erreur: ' + error.message);
     }
 }
 
-// Supprimer une carte
-async function deleteCard(id) {
-    if (!confirm('Êtes-vous sûr ?')) return;
-
+async function deleteCard(cardId) {
+    if (!confirm('Supprimer vraiment?')) return;
+    
     try {
         const { error } = await supabase
             .from('cards')
             .delete()
-            .eq('id', id);
-
+            .eq('id', cardId);
+        
         if (error) throw error;
-
-        alert('✅ Carte supprimée !');
-        loadCards();
+        
+        await loadCards();
+        renderCards(filteredCards);
+        loadAdminList();
+        
     } catch (error) {
-        alert('❌ Erreur : ' + error.message);
+        console.error('❌ Erreur suppression:', error);
+        alert('Erreur: ' + error.message);
     }
 }
 
-// Filtrer les cartes
-function filterCards() {
-    const searchTerm = searchInput.value.toLowerCase();
-    const typeValue = typeFilter.value;
-    const rarityValue = rarityFilter.value;
-
-    filteredCards = allCards.filter(card => {
-        const matchSearch = card.name.toLowerCase().includes(searchTerm) || 
-                           card.dresseur.toLowerCase().includes(searchTerm);
-        const matchType = !typeValue || card.type === typeValue;
-        const matchRarity = !rarityValue || card.rarity === rarityValue;
-
-        return matchSearch && matchType && matchRarity;
+async function loadAdminList() {
+    const adminList = document.getElementById('adminList');
+    adminList.innerHTML = '';
+    
+    allCards.forEach(card => {
+        const el = document.createElement('div');
+        el.className = 'admin-card';
+        el.innerHTML = `
+            <div class="admin-card-image">
+                <img src="${card.image}" alt="${card.name}">
+            </div>
+            <div class="admin-card-info">
+                <div class="admin-card-name">${card.name}</div>
+                <div class="admin-card-details">
+                    Type: ${card.type} | Rareté: ${card.rarity} | ${card.price.toFixed(2)}€
+                </div>
+            </div>
+            <div class="admin-card-actions">
+                <button class="admin-btn admin-btn-edit" onclick="alert('Coming soon!')">Edit</button>
+                <button class="admin-btn admin-btn-delete" data-id="${card.id}">Delete</button>
+            </div>
+        `;
+        
+        el.querySelector('.admin-btn-delete').addEventListener('click', () => deleteCard(card.id));
+        adminList.appendChild(el);
     });
-
-    displayCards(filteredCards);
 }
 
-// Like/Unlike
-function toggleLike(id) {
-    const btn = event.target.closest('.btn-heart');
-    btn.classList.toggle('liked');
-    // À implémenter : sauvegarder les likes dans la DB
+// ============================
+// 🎯 EVENT BINDINGS
+// ============================
+
+function bindEvents() {
+    // Filter buttons
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            filterCards();
+        });
+    });
+    
+    // Nav links
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            const filter = e.target.dataset.filter;
+            if (filter) {
+                navLinks.forEach(l => l.classList.remove('active'));
+                e.target.classList.add('active');
+                currentFilter = filter;
+                
+                if (filter === 'favorites') {
+                    renderCards(favorites);
+                } else {
+                    filterCards();
+                }
+            }
+        });
+    });
+    
+    // Search
+    searchInput.addEventListener('input', filterCards);
+    
+    // Modal
+    modalClose.addEventListener('click', closeCardModal);
+    overlay.addEventListener('click', closeCardModal);
+    addToCartBtn.addEventListener('click', addToCart);
+    toggleFavBtn.addEventListener('click', toggleFavorite);
+    
+    // Cart
+    cartLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        cartSidebar.classList.add('active');
+        overlay.classList.add('active');
+    });
+    
+    closeCart.addEventListener('click', () => {
+        cartSidebar.classList.remove('active');
+        overlay.classList.remove('active');
+    });
+    
+    // Cart items events
+    cartItems.addEventListener('click', (e) => {
+        if (e.target.classList.contains('qty-btn')) {
+            const id = parseInt(e.target.dataset.id);
+            const action = e.target.dataset.action;
+            updateQuantity(id, action === 'plus' ? 1 : -1);
+        }
+        if (e.target.classList.contains('remove-item')) {
+            const id = parseInt(e.target.dataset.id);
+            removeFromCart(id);
+        }
+    });
+    
+    // Admin
+    adminToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        adminPanel.classList.add('active');
+        overlay.classList.add('active');
+        loadAdminList();
+    });
+    
+    adminClose.addEventListener('click', () => {
+        adminPanel.classList.remove('active');
+        overlay.classList.remove('active');
+    });
+    
+    // Admin tabs
+    adminTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            adminTabs.forEach(t => t.classList.remove('active'));
+            adminContents.forEach(c => c.classList.remove('active'));
+            
+            tab.classList.add('active');
+            const tabId = tab.dataset.tab + 'Tab';
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+    
+    // Admin form
+    addCardForm.addEventListener('submit', addCard);
+    
+    // Close all on overlay click
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            cardModal.classList.remove('active');
+            cartSidebar.classList.remove('active');
+            adminPanel.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+    });
 }
 
-// Initialiser l'app
-loadCards();
+// ============================
+// 🚀 START
+// ============================
 
-// Auto-refresh chaque 30 secondes
-setInterval(loadCards, 30000);
+document.addEventListener('DOMContentLoaded', init);
